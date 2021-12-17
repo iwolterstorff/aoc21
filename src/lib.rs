@@ -22,3 +22,21 @@ pub fn parse_input_reader(reader: impl io::BufRead) -> Vec<i32> {
 
     numbers
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_input_reader() {
+        let reader = io::BufReader::new("32\n77\n".as_bytes());
+        assert_eq!(parse_input_reader(reader), vec![32, 77]);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_cannot_parse_a_number() {
+        let reader = io::BufReader::new("55\ncake\n".as_bytes());
+        parse_input_reader(reader);
+    }
+}
