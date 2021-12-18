@@ -26,12 +26,14 @@ impl FromStr for Movement {
 struct Position {
     horizontal: i32,
     depth: i32,
+    aim: i32,
 }
 
 fn calc_final_position(movements: Vec<Movement>) -> Position {
     let starting = Position {
         horizontal: 0,
         depth: 0,
+        aim: 0,
     };
     movements
         .iter()
@@ -51,13 +53,49 @@ fn calc_final_position(movements: Vec<Movement>) -> Position {
         })
 }
 
-pub fn day_2_1(path: &Path) -> i32 {
+fn calc_final_position_with_aim(movements: Vec<Movement>) -> Position {
+    let starting = Position {
+        horizontal: 0,
+        depth: 0,
+        aim: 0,
+    };
+    movements
+        .iter()
+        .fold(starting, |position, movement| match movement {
+            Movement::Forward(n) => Position {
+                horizontal: position.horizontal + n,
+                depth: position.depth + (position.aim * n),
+                ..position
+            },
+            Movement::Up(n) => Position {
+                aim: position.aim - n,
+                ..position
+            },
+            Movement::Down(n) => Position {
+                aim: position.aim + n,
+                ..position
+            },
+        })
+}
+
+fn get_input(path: &Path) -> Vec<Movement> {
     let movement_strings: Vec<String> = tokenize_file(path).expect("Couldn't tokenize input");
     let movements: Result<Vec<Movement>> = movement_strings
         .iter()
         .map(|s| Movement::from_str(s))
         .collect();
     let movements = movements.expect("Can't cast to Movement structs");
+    movements
+}
+
+pub fn day_2_1(path: &Path) -> i32 {
+    let movements = get_input(path);
     let final_position = calc_final_position(movements);
     (final_position.horizontal * final_position.depth).into()
+}
+
+pub fn day_2_2(path: &Path) -> i32 {
+    let movements = get_input(path);
+    let final_position = calc_final_position_with_aim(movements);
+    final_position.horizontal * final_position.depth
 }
