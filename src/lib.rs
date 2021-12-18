@@ -1,42 +1,52 @@
 use std::fs;
 use std::io;
+use std::num::ParseIntError;
 use std::path;
 
-pub fn parse_input_file<P: AsRef<path::Path>>(path: P) -> Vec<i32> {
-    let file = fs::File::open(path).expect("Couldn't open file");
-    let reader = io::BufReader::new(file);
+use anyhow::Result;
 
-    parse_input_reader(reader)
+pub fn tokenize_input(reader: impl io::BufRead) -> Result<Vec<String>> {
+    reader
+        .lines()
+        .collect::<Result<Vec<_>, io::Error>>()
+        .map_err(anyhow::Error::new)
 }
 
-pub fn parse_input_reader(reader: impl io::BufRead) -> Vec<i32> {
-    // TODO: Look into better error handling
-    let lines = reader.lines();
-    let numbers = lines
-        .map(|l| {
-            l.expect("Couldn't read a line from input")
-                .parse::<i32>()
-                .expect("Couldn't convert a number to integer")
-        })
-        .collect();
+pub fn tokenize_input_to_integers(reader: impl io::BufRead) -> Result<Vec<i32>> {
+    let lines = tokenize_input(reader)?;
+    lines
+        .into_iter()
+        .map(|l| l.parse::<i32>())
+        .collect::<Result<Vec<_>, ParseIntError>>()
+        .map_err(anyhow::Error::new)
+}
 
-    numbers
+pub fn tokenize_file<P: AsRef<path::Path>>(path: P) -> Result<Vec<String>> {
+    let file = fs::File::open(path)?;
+    tokenize_input(io::BufReader::new(file))
+}
+
+pub fn tokenize_file_to_integers<P: AsRef<path::Path>>(path: P) -> Result<Vec<i32>> {
+    let file = fs::File::open(path)?;
+    tokenize_input_to_integers(io::BufReader::new(file))
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use anyhow::Result;
 
     #[test]
-    fn test_parse_input_reader() {
+    fn test_parse_input_reader() -> Result<()> {
         let reader = io::BufReader::new("32\n77\n".as_bytes());
-        assert_eq!(parse_input_reader(reader), vec![32, 77]);
+        assert_eq!(tokenize_input_to_integers(reader)?, vec![32, 77]);
+        Ok(())
     }
 
     #[test]
     #[should_panic]
     fn test_cannot_parse_a_number() {
         let reader = io::BufReader::new("55\ncake\n".as_bytes());
-        parse_input_reader(reader);
+        tokenize_input_to_integers(reader).unwrap();
     }
 }
