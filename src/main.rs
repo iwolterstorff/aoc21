@@ -118,6 +118,13 @@ fn get_solution_from_options(opts: Args) -> Solution {
             input: "inputs/2.txt",
             function: days::day_two::day_2_2,
         },
+        Args {
+            day: Day(3),
+            puzzle: Problem(false),
+        } => Solution {
+            input: "inputs/3.txt",
+            function: days::day_three::day_3_1,
+        },
         _ => panic!("You're dumb"),
     }
 }

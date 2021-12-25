@@ -31,6 +31,11 @@ pub fn tokenize_file_to_integers<P: AsRef<path::Path>>(path: P) -> Result<Vec<i3
     tokenize_input_to_integers(io::BufReader::new(file))
 }
 
+pub fn nth_bit_set(number: i32, n: u32) -> bool {
+    let two: i32 = 2;
+    two.pow(n) & number != 0
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
